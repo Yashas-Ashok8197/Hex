@@ -187,6 +187,7 @@ export function resolvePluginInstallSourcePlan(params: {
   const npmSpec = explicitNpm ?? params.raw;
   const bundledPlan = resolveBundledInstallPlanBeforeNpm({
     rawSpec: params.raw,
+    pin: params.pin,
     findBundledSource: (lookup) => findBundledPluginSource({ lookup }),
   });
   if (bundledPlan) {

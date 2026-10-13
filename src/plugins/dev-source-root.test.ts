@@ -3,7 +3,10 @@ import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { isBundledPluginInsideDevSourceRoot } from "./dev-source-root.js";
-import { resolveManagedPluginInstallRequest } from "./install-source-plan.js";
+import {
+  resolveManagedPluginInstallRequest,
+  resolvePluginInstallSourcePlan,
+} from "./install-source-plan.js";
 import { createPluginCache, withPluginCache } from "./plugin-cache.js";
 
 const host = vi.hoisted(() => ({ root: "" }));
@@ -84,6 +87,54 @@ describe("packaged development official plugins", () => {
           ).source,
         ).toBe("official");
       }
+    });
+  });
+
+  it.each([
+    {
+      name: "explicit version",
+      stagedCommit: commit,
+      raw: "@openclaw/codex@2026.9.3",
+      pin: false,
+      expected: "npm",
+    },
+    {
+      name: "pinned package",
+      stagedCommit: commit,
+      raw: "@openclaw/codex",
+      pin: true,
+      expected: "official",
+    },
+    {
+      name: "unqualified package",
+      stagedCommit: commit,
+      raw: "@openclaw/codex",
+      pin: false,
+      expected: "bundled",
+    },
+    {
+      name: "explicit npm override",
+      stagedCommit: commit,
+      raw: "npm:@openclaw/codex",
+      pin: false,
+      expected: "npm",
+    },
+    {
+      name: "release package",
+      stagedCommit: undefined,
+      raw: "@openclaw/codex@2026.9.3",
+      pin: false,
+      expected: "bundled",
+    },
+  ])("preserves source selection for $name", ({ stagedCommit, raw, pin, expected }) => {
+    fixture(stagedCommit);
+    withPluginCache(createPluginCache(), () => {
+      const plan = resolvePluginInstallSourcePlan({
+        raw,
+        mode: "install",
+        pin,
+      });
+      expect(plan).toMatchObject({ ok: true, request: { source: expected } });
     });
   });
 
