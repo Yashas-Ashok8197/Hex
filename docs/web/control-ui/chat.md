@@ -12,6 +12,10 @@ sidebarTitle: "Chat"
 
 How the chat pane behaves: the session rail, the composer, and how the transcript renders.
 
+When the latest history page has no visible messages, for example because tool
+activity is hidden, the pane loads earlier history automatically. An incomplete
+history page does not show the new-chat welcome screen.
+
 Enable **Settings → Labs → Speech bubbles** to try the experimental view (off by default).
 While enabled, Home uses bubbles by default. The session menu’s **View → Speech bubbles**
 option changes only that conversation. Explicit choices stay in this browser for this
@@ -517,7 +521,7 @@ Run-error banners offer **Refresh** to reload the conversation without resending
 
   </Accordion>
   <Accordion title="Stop and abort">
-    - Click **Stop**. Runs with an exact local run ID call `chat.abort`; when selected-session state reports active work but the Control UI has no local run ID, it calls `sessions.abort` instead. For non-global sessions, that selected-session path also discards queued follow-ups so they cannot restart work after the stop.
+    - Click **Stop**. Runs with an exact local run ID call `chat.abort`; when selected-session state reports active work but the Control UI has no local run ID, it calls `sessions.abort` instead. Participant display updates do not interrupt Stop while the request is being prepared. For non-global sessions, that selected-session path also discards queued follow-ups so they cannot restart work after the stop.
     - Exact-run Stop cancels that parent's associated sub-agents and Swarm collectors, including their descendants. Successful cancellation prevents selected queued children from starting while running siblings stop; it leaves unrelated parent turns and session-wide queues alone.
     - If Stop reports incomplete descendant cancellation, inspect the remaining native subagent runs with `/subagents list` and ask the agent to retry their cancellation with `subagents`. Do not treat the parent's stopped state as confirmation that every child stopped or that runtime cleanup was instantaneous. See [Sub-agent stopping](/tools/subagents#stopping) for scope details.
     - While a run is active, normal follow-ups use the Gateway's effective `messages.queue` mode. `steer` injects into the running turn; other modes keep the browser's durable queued delivery. If the Gateway queues an input instead of steering it, the message appears above the composer until consumed or canceled. Reconnecting also recovers queued inputs from older history pages without changing the page you are viewing. Once the Gateway accepts input for an existing session, its database owns the approved input until it reaches the transcript. Collected messages are retired together with their combined transcript entry. Unconsumed input survives a Gateway restart as interrupted input requiring an explicit resend. Click **Steer** on a browser-owned queued message to inject it manually; removing a server-owned queued message requests its cancellation. A message you steer moves once from the queue to the bottom of the transcript when delivery starts. It stays there while acknowledgment and history catch up, until its saved copy replaces it. Accepted messages keep their saved transcript positions: earlier saved output stays above the steer and later output appears below it. This order survives history refreshes, reconnects, and reloading a finished run. Unsaved assistant text remains a single live tail after saved rows until its own transcript entries arrive.
@@ -810,8 +814,17 @@ HTML widget media keep their existing behavior.
 
 ## Session Details
 
-Select **Details** at the top-right of the conversation to open the session’s compact information surface.
-It opens only on request, not when progress or background activity updates.
+**Details** brings session context and task progress together beside the conversation.
+On wide chat panes it opens automatically as a docked right-hand column, with
+the transcript and composer centered in the remaining space. Docking uses the
+space left after navigation, split panes, and other panels—not the window width
+alone. The column scrolls independently and never covers the conversation.
+
+When the pane becomes too narrow, automatically opened Details collapses. Select
+**Details** to open it as an overlay on narrower screens. Closing it explicitly
+keeps it closed while that conversation remains open, including through progress
+updates, resizing, and temporarily hiding its pane. Selecting **Details** reopens it.
+
 **Session details** and **Task progress** have independent disclosure states.
 Session context groups workspace information, pull requests, people, subagents,
 and attached automations; it reuses their existing actions rather than duplicating
@@ -847,8 +860,8 @@ Task progress cards are enabled by default. Toggle **Show task progress cards** 
 Hiding it does not stop agent work or clear saved progress.
 
 Opening Details does not couple the two sections’ disclosure states. Sending
-messages, run completion, and progress updates do not automatically open Details
-or reopen a card the user collapsed. See
+messages, run completion, and progress updates do not reopen Details after it is
+explicitly closed or reopen a card the user collapsed. See
 [Task progress cards](/tools/progress-card#where-the-card-appears) for card-lifetime
 and preference behavior.
 
