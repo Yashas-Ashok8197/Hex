@@ -642,7 +642,6 @@ test.each(["idle", "active"] as const)(
       );
       expect(closesAtDrain).toBe(0);
       expect(nativeClosesAtDrain).toBe(0);
-      expect(loadSessionEntryReadOnly(fixture.scopes[1]!)).toBeUndefined();
     } else {
       markGatewayRestartDraining("restart (SIGTERM)");
     }
@@ -653,6 +652,10 @@ test.each(["idle", "active"] as const)(
     expect(spawned[0]?.threadId).toBe(-1);
     expect(leasesFor(fixture)).toHaveLength(0);
     expect(readSqliteDatabaseCleanClose(fixture.database.path)).toBe(true);
+    if (timing === "active") {
+      // Observe the clean retirement before admitting another retained reader.
+      expect(loadSessionEntryReadOnly(fixture.scopes[1]!)).toBeUndefined();
+    }
     resetGatewayWorkAdmission();
     await expect(runSqliteSessionReclamation({ plan: fixture.plans[2]! })).resolves.toMatchObject({
       kind: "lifecycle-artifacts",
