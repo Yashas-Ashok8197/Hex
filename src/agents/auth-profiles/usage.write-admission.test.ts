@@ -43,14 +43,16 @@ import {
   writePersistedAuthProfileStoreRaw,
 } from "./sqlite.js";
 import { saveAuthProfileStore, updateAuthProfileStoreWithLock } from "./store-runtime.js";
-import type { AuthProfileStore } from "./types.js";
+import type { AuthProfileCredential, AuthProfileStore } from "./types.js";
 import { withAuthProfileUsage } from "./usage-write.js";
 import { markAuthProfileFailure } from "./usage.js";
 
 const profileId = "fixture-provider:admission";
 const saveOptions = { filterExternalAuthProfiles: false, syncExternalCli: false };
 
-function createStore(): AuthProfileStore {
+function createStore(): AuthProfileStore & {
+  profiles: Record<typeof profileId, AuthProfileCredential>;
+} {
   return {
     version: 1,
     profiles: {
