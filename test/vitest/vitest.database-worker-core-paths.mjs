@@ -137,6 +137,8 @@ export const databaseWorkerCoreTestFiles = [
   "src/agents/model-auth.profiles.test.ts",
   // Native credential fixtures need the host's exclusive offline writer custody.
   "src/agents/agent-model-discovery.auth.test.ts",
+  "src/agents/auth-profiles/session-override.model-endpoint.test.ts",
+  "src/agents/tools/image-generate-tool.auth.test.ts",
   "src/agents/auth-profiles.permissions.test.ts",
   "src/agents/prepared-model-catalog-worker.authority.test.ts",
   "src/agents/embedded-agent-runner/run/auth-plan.auth-pin.test.ts",
@@ -148,6 +150,7 @@ export const databaseWorkerCoreTestFiles = [
   "src/secrets/runtime.auth-migration-isolation.test.ts",
   "src/secrets/runtime.fast-path.test.ts",
   "src/sessions/auth-profile-preservation.test.ts",
+  "src/system-agent/approval-intent.resources.test.ts",
   "src/test-utils/openclaw-test-state.test.ts",
   "test/test-env.test.ts",
   "src/agents/model-auth-label.personal-profile.test.ts",
@@ -837,6 +840,7 @@ export const databaseWorkerCoreTestFiles = [
   "src/meeting-bot/session-runtime.test.ts",
   "src/meeting-bot/transcripts-bridge.provenance.test.ts",
   "src/meeting-bot/transcripts-bridge.test.ts",
+  "src/transcripts/auto-start-retry.test.ts",
   "src/transcripts/capture-stop.test.ts",
   "src/transcripts/capture-append-drain.test.ts",
   "src/transcripts/library.query-budget.test.ts",
@@ -1019,6 +1023,7 @@ export const databaseWorkerCoreTestFiles = [
   "src/plugins/official-external-plugin-catalog-snapshot-store.worker.test.ts",
   "src/plugins/official-external-plugin-catalog.test.ts",
   "src/infra/device-pairing.test.ts",
+  "src/infra/device-pairing.ingress-approval.test.ts",
   "src/infra/device-bootstrap.test.ts",
   "src/infra/device-bootstrap.worker.test.ts",
   "src/infra/device-pairing-approval-policy.test.ts",
@@ -1207,6 +1212,7 @@ export const databaseWorkerCoreTestFiles = [
   "src/plugin-state/plugin-state-publication.test.ts",
   "test/visitor-access-revocation.test.ts",
   "src/agents/tools/cron-tool.output-contract.test.ts",
+  "src/plugins/services.control-ui-ingress.test.ts",
   "src/plugins/services.cron.test.ts",
   "test/plugins/dreaming-cron-doctor.integration.test.ts",
   "test/plugins/memory-dreaming-cron.test.ts",
@@ -1269,6 +1275,7 @@ const databaseWorkerCoreTestFileSet = new Set(databaseWorkerCoreTestFiles);
 
 // Preserve watch admission for consumers previously inferred into fast lanes.
 export const databaseWorkerCoreFormerFastKinds = new Map([
+  ["src/agents/auth-profiles/session-override.model-endpoint.test.ts", "unitFast"],
   ["src/agents/harness/execution-environment.worker.test.ts", "unitFastIsolated"],
   ["src/acp/event-ledger.prepared.test.ts", "unitFastIsolated"],
   ["src/acp/event-ledger.test.ts", "unitFastIsolated"],
@@ -1288,6 +1295,7 @@ export const databaseWorkerCoreFormerFastKinds = new Map([
   ["src/commands/doctor-session-canonical-keys.owner-repair.test.ts", "unitFast"],
   ["src/commands/doctor-session-canonical-keys.test.ts", "unitFast"],
   ["src/plugins/installed-plugin-index-store.availability.test.ts", "unitFast"],
+  ["src/plugins/services.control-ui-ingress.test.ts", "unitFast"],
   ["test/e2e/qa-lab/runtime/gateway-loopback-lan-access.test.ts", "unitFast"],
   ["src/infra/outbound/bound-delivery-router.test.ts", "unitFast"],
   ["src/agents/subagents/registry/subagent-registry.session-failure.test.ts", "unitFast"],
