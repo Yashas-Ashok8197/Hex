@@ -953,6 +953,13 @@ describe("runCliAgent reliability", () => {
         runId: "run-committed-final",
       });
       context.authBindingFingerprint = "fixture-auth-binding";
+      context.preparedBackend.backend.command = process.execPath;
+      cliBackendsTesting.setDepsForTest({
+        resolvePluginSetupCliBackend: () => undefined,
+        resolveRuntimeCliBackends: () => [
+          { id: "claude-cli", pluginId: "fixture", config: context.preparedBackend.backend },
+        ],
+      });
       let committed = false;
       const notifyAuthBinding = vi.fn();
       const error =
