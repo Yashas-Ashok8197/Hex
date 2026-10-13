@@ -127,8 +127,14 @@ export function createManagedHandoffTestBinding(directory: string) {
   const preloadPath = path.join(directory, "handoff-resolver-preload.mjs");
   writeExactPrivateModule(
     preloadPath,
-    `import { installManagedHandoffTestBinding } from ${JSON.stringify(helperUrl)};\n` +
-      `installManagedHandoffTestBinding(${JSON.stringify(binding)});\n`,
+    // Pure revision probes never open the handoff store; avoid a TS resolver boot per hash.
+    `import path from "node:path";\n` +
+      `const revisionProbe = ["js", "ts"].some(extension => process.argv[1]?.endsWith(path.join("infra", "sqlite-source-revision.worker." + extension))) &&\n` +
+      `  process.argv[2] === "--openclaw-sqlite-readonly-child" && ["content-version", "file-generation"].includes(process.argv[3]);\n` +
+      `if (!revisionProbe) {\n` +
+      `  const { installManagedHandoffTestBinding } = await import(${JSON.stringify(helperUrl)});\n` +
+      `  installManagedHandoffTestBinding(${JSON.stringify(binding)});\n` +
+      `}\n`,
   );
   return {
     ...binding,

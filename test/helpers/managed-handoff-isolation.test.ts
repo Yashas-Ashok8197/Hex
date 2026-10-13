@@ -5,6 +5,9 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveServiceManagerEnv } from "../../src/daemon/service-process-env.js";
+import { resolveRuntimeProcessEntrypointUrl } from "../../src/infra/runtime-process-url.js";
+import { captureRuntimeWorkerSource } from "../../src/infra/runtime-worker-generation.js";
+import { resolveRuntimeWorkerArgv } from "../../src/infra/runtime-worker-url.js";
 import {
   assertManagedHandoffTestConsumer,
   createManagedHandoffTestBinding,
@@ -88,6 +91,41 @@ describe("explicit managed handoff test binding", () => {
       ).toThrow(/No bound handoff resolver witness/);
       expect(fs.existsSync(binding.databasePath)).toBe(false);
     }
+  });
+
+  it("observes real SQLite revision bytes without booting the unrelated handoff resolver", () => {
+    const { root, binding } = fixture();
+    const database = path.join(root, "source.sqlite");
+    const { moduleUrl } = captureRuntimeWorkerSource(
+      resolveRuntimeProcessEntrypointUrl("sqliteSourceRevision"),
+    );
+    const observe = () => {
+      const child = spawnSync(
+        requireNodeTool("node"),
+        [
+          binding.nodeOption,
+          ...resolveRuntimeWorkerArgv(moduleUrl),
+          "--openclaw-sqlite-readonly-child",
+          "content-version",
+          database,
+        ],
+        { env: resolveServiceManagerEnv(), encoding: "utf8", timeout: 15_000 },
+      );
+      expect(child.error).toBeUndefined();
+      expect(child.status, child.stderr).toBe(0);
+      const result = JSON.parse(child.stdout);
+      expect(result).toMatchObject({
+        ok: true,
+        contentVersion: expect.stringMatching(/^[a-f0-9]{64}$/),
+      });
+      return result.contentVersion;
+    };
+    fs.writeFileSync(database, "first revision");
+    const first = observe();
+    fs.writeFileSync(database, "second revision");
+    expect(observe()).not.toBe(first);
+    expect(fs.readdirSync(root).some((name) => name.startsWith("preflight-"))).toBe(false);
+    expect(fs.existsSync(binding.databasePath)).toBe(false);
   });
 
   it("admits a second worker while another is publishing its resolver shim", () => {
