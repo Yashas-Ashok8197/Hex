@@ -213,7 +213,7 @@ export async function runPreparedCliAgent(
     diagnosticLifecycle,
     run: (complete) =>
       runWithCliHistoryWriter(context.cliHistoryWriter, () =>
-        runPreparedCliAgentOwned(context, complete),
+        runPreparedCliAgentOwned(context, complete, diagnosticLifecycle),
       ),
   });
 }
@@ -221,6 +221,7 @@ export async function runPreparedCliAgent(
 async function runPreparedCliAgentOwned(
   context: PreparedCliRunContext,
   complete: (result: EmbeddedAgentRunResult) => void,
+  diagnosticLifecycle?: ClaudeCliRunDiagnosticLifecycle,
 ): Promise<EmbeddedAgentRunResult> {
   let executePreparedCliRun: typeof import("./cli-runner/execute.runtime.js").executePreparedCliRun;
   const { params } = context;
