@@ -137,6 +137,7 @@ export const databaseWorkerCoreTestFiles = [
   // Native credential fixtures need the host's exclusive offline writer custody.
   "src/agents/agent-model-discovery.auth.test.ts",
   "src/agents/auth-profiles/session-override.model-endpoint.test.ts",
+  "src/agents/tools/image-generate-tool.auth.test.ts",
   "src/agents/auth-profiles.permissions.test.ts",
   "src/agents/prepared-model-catalog-worker.authority.test.ts",
   "src/agents/embedded-agent-runner/run/auth-plan.auth-pin.test.ts",
@@ -837,6 +838,7 @@ export const databaseWorkerCoreTestFiles = [
   "src/meeting-bot/session-runtime.test.ts",
   "src/meeting-bot/transcripts-bridge.provenance.test.ts",
   "src/meeting-bot/transcripts-bridge.test.ts",
+  "src/transcripts/auto-start-retry.test.ts",
   "src/transcripts/capture-stop.test.ts",
   "src/transcripts/capture-append-drain.test.ts",
   "src/transcripts/library.query-budget.test.ts",
