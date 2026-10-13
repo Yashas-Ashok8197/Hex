@@ -616,12 +616,11 @@ describe("package-openclaw-for-docker", () => {
     "rejects selected plugin dependency $spec without resolving a replacement",
     async ({ spec, error }) => {
       const { sourceDir, outputDir, files, pluginPackage } = createSelectedPluginPackageFixture();
-      pluginPackage.dependencies.shared = spec;
       for (const prefix of ["extensions", "dist/extensions"]) {
-        fs.writeFileSync(
-          path.join(sourceDir, prefix, "demo/package.json"),
-          JSON.stringify(pluginPackage),
-        );
+        const packagePath = path.join(sourceDir, prefix, "demo/package.json");
+        const metadata: typeof pluginPackage = JSON.parse(fs.readFileSync(packagePath, "utf8"));
+        metadata.dependencies.shared = spec;
+        fs.writeFileSync(packagePath, JSON.stringify(metadata));
       }
       await expect(
         packOpenClawPackageForDocker(sourceDir, outputDir, {
