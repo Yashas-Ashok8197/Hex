@@ -954,10 +954,21 @@ describe("runCliAgent reliability", () => {
       });
       context.authBindingFingerprint = "fixture-auth-binding";
       context.preparedBackend.backend.command = process.execPath;
+      context.backendResolved.runtimeArtifact = {
+        kind: "bundled-package-tree",
+        packageName: "@fixture/cli-runner",
+        entrypoint: "command",
+        nativeExecutableNames: [path.basename(process.execPath)],
+      };
       cliBackendsTesting.setDepsForTest({
         resolvePluginSetupCliBackend: () => undefined,
         resolveRuntimeCliBackends: () => [
-          { id: "claude-cli", pluginId: "fixture", config: context.preparedBackend.backend },
+          {
+            id: "claude-cli",
+            pluginId: "fixture",
+            config: context.preparedBackend.backend,
+            runtimeArtifact: context.backendResolved.runtimeArtifact,
+          },
         ],
       });
       let committed = false;
