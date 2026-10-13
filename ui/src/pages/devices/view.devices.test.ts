@@ -435,6 +435,7 @@ describe("devices inventory rendering", () => {
       getSettingsRow(container, "Node One").querySelector<HTMLButtonElement>(
         ".device-entry__menu-trigger",
       ),
+      "device actions trigger",
     );
     trigger.click();
     await waitForSolid(() => expect(trigger.getAttribute("aria-expanded")).toBe("true"));
@@ -448,8 +449,9 @@ describe("devices inventory rendering", () => {
 
     expect(container.querySelector('[role="menuitem"][data-value="approve"]')).not.toBeNull();
     expect(
-      Array.from(container.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'), (item) =>
-        item.dataset.value,
+      Array.from(
+        container.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'),
+        (item) => item.dataset.value,
       ),
     ).toEqual(["approve", "reject", "copy", "remove"]);
     expect(container.querySelector('[role="menuitem"][data-value="copy"]')).toBe(copy);
@@ -848,6 +850,7 @@ describe("devices access gating", () => {
         getSettingsRow(container, "Pending node").querySelector<HTMLButtonElement>(
           `[role="menuitem"][data-value="${action}"]`,
         ),
+        `device action ${action}`,
       );
       expect(item.disabled).toBe(true);
       expect(item.title).toContain("operator.pairing");
