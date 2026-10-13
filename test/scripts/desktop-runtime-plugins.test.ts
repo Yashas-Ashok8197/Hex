@@ -57,6 +57,50 @@ function fixture() {
 }
 
 describe("desktop runtime source plugins", () => {
+  it.runIf(process.platform === "darwin")(
+    "normalizes only staged Codex voice build rpaths",
+    async () => {
+      const { auditMacRuntimePortability } =
+        await import("../../scripts/lib/mac-runtime-portability.mjs");
+      const root = temps.make("desktop-runtime-codex-native-");
+      const commit = "a".repeat(40);
+      writeJson(root, "dist/build-info.json", { commit });
+      writeJson(root, "dist/extensions/codex/package.json", {
+        openclaw: { extensions: ["./index.mjs"] },
+      });
+      writeFileSync(path.join(root, "dist/extensions/codex/index.mjs"), "export {};\n");
+      for (const name of ["codex", "codex-darwin-arm64"]) {
+        writeJson(root, `node_modules/@openai/${name}/package.json`, { name: `@openai/${name}` });
+      }
+      const voice = path.join(
+        root,
+        "node_modules/@openai/codex-darwin-arm64/vendor/aarch64-apple-darwin/codex-resources/voice",
+      );
+      mkdirSync(path.join(voice, "lib"), { recursive: true });
+      mkdirSync(path.join(voice, "bin"));
+      const host = path.join(voice, "bin/codex-voice-host");
+      execFileSync(
+        "/usr/bin/clang",
+        [
+          "-x",
+          "c",
+          "-",
+          "-o",
+          host,
+          "-Wl,-rpath,@loader_path/../../_solib_darwin_arm64/voice/native_link_macos_aarch64",
+          "-Wl,-rpath,@loader_path/../lib",
+        ],
+        { input: "int main(void) { return 0; }\n" },
+      );
+      const original = readFileSync(host);
+      stampDesktopRuntimePlugins(root, { commit, pluginIds: [] });
+      expect(readFileSync(host)).toEqual(original);
+      expect(() => auditMacRuntimePortability(root, host)).toThrow("Nonportable LC_RPATH");
+      stampDesktopRuntimePlugins(root, { commit, pluginIds: ["codex"] });
+      expect(auditMacRuntimePortability(root, host)).toBe(1);
+    },
+  );
+
   it.each([
     [[], null],
     [["release/2026.10.2", "v2026.9.2"], null],
