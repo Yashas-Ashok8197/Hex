@@ -427,6 +427,19 @@ openclaw-systems-page {
   margin-bottom: 4px;
   color: var(--muted);
 }
+
+.systems-filter-menu {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.systems-filter-menu .oc-menu-item__check {
+  display: none;
+}
+
+.systems-filter__sort > .oc-menu-item__label {
+  display: flex;
+}
 .systems-filter > span {
   display: inline-flex;
   flex: 0 0 auto;
