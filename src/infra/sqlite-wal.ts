@@ -515,6 +515,10 @@ export function configureSqliteWalMaintenance(
   if (checkpointTickMs > 0 && !isSqliteWalWorkerMaintained(db)) {
     let stopped = false;
     let tick: GatewayScheduledJob | undefined;
+    const cancelTick = () => {
+      tick?.cancel();
+      tick = undefined;
+    };
     const armTick = () => {
       if (!stopped && !tick && !scope.signal.aborted && !invalidated) {
         tick = runInSqliteMaintenanceContext(() =>
@@ -536,8 +540,7 @@ export function configureSqliteWalMaintenance(
       const completed =
         revision === undefined ? undefined : sharedCompletedCheckpoint(db, revision);
       if (completed && Atomics.load(completed, 0) === revision) {
-        tick?.cancel();
-        tick = undefined;
+        cancelTick();
       } else {
         // Blocked readers and suspended maintenance still need their existing retry deadline.
         armTick();
@@ -549,8 +552,7 @@ export function configureSqliteWalMaintenance(
       stopCheckpointTick = () => {
         stopped = true;
         unregisterWrites();
-        tick?.cancel();
-        tick = undefined;
+        cancelTick();
       };
       armTick();
     } else {
