@@ -37,6 +37,7 @@ import {
   readChatPaneMutationAccess,
   readChatPublicationAccess,
   renderChatPaneComposerControls,
+  openChatPaneModelPicker,
 } from "./chat-pane-session-controls.ts";
 import { resolveChatPaneUserPresentation } from "./chat-pane-session-presentation.ts";
 import {
@@ -46,6 +47,8 @@ import {
 import {
   chatSubmitState,
   createChatPaneSendActions,
+  createChatPaneRunRecoveryActions,
+  chatFailureRunId,
   dismissChatError,
   resolveChatPaneFollowUpMode,
   projectChatPaneTranscript,
@@ -591,6 +594,15 @@ export class ChatPane extends ChatPaneLayoutRender {
         modelRequiredReason,
         continueSession: catalogKey ? () => this.continueCatalogSession(catalogKey) : undefined,
         addSuggestion: suggestionViewer ? () => this.addCurrentSessionSuggestion() : undefined,
+      }),
+      ...createChatPaneRunRecoveryActions(state, {
+        canSend: composerAvailability.canSend && !catalogKey && !suggestionViewer,
+        canChangeModel: mutationAccess.model.allowed && !catalogKey && !suggestionViewer,
+        isCurrent: () =>
+          this.state === state && this.connectionGeneration === selectionConnectionGeneration,
+        latestFailedRunId: () =>
+          chatFailureRunId(state.chatRunError, selectedChatSessionRow(state)),
+        openModelPicker: () => openChatPaneModelPicker(state),
       }),
       onUseSystemDefaultMicrophone: state.realtimeTalkUseSystemDefault ?? undefined,
       onToggleRealtimeTalk: () => (providerPaused ? undefined : void state.toggleRealtimeTalk()),

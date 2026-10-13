@@ -241,7 +241,7 @@ describe("app-tool-stream startup status", () => {
       handleAgentEvent(host, { ...retry, runId: "run-other", seq: 4 });
       handleAgentEvent(host, { ...toolStart("run-1", "tool-old"), seq: 2 });
       expect(host.chatRunId).toBe("run-1");
-      expect(retryLabel()).toBe(retry.data.message);
+      expect(retryLabel()).toBe("Retrying…");
 
       handleAgentEvent(host, {
         ...retry,
@@ -259,7 +259,7 @@ describe("app-tool-stream startup status", () => {
       expect(host.chatRunId).toBe("run-1");
 
       handleAgentEvent(host, { ...retry, seq: 5 });
-      expect(retryLabel()).toBe(retry.data.message);
+      expect(retryLabel()).toBe("Retrying…");
     },
   );
 });

@@ -32,6 +32,7 @@ import { livePresentation, type PresentationValue } from "../../lit/presentation
 import { renderPluginSurface } from "../../plugins/control-ui-view.ts";
 import { releaseChatAttachmentPayloads } from "./attachment-payload-store.ts";
 import { getChatHistoryLoadState } from "./chat-history-state.ts";
+import { chatFailureRunId } from "./chat-pane-state.ts";
 import {
   buildPendingInputQueueItems,
   getChatPendingInputs,
@@ -40,12 +41,12 @@ import {
 import { chatStartupStatusLabel, type ChatRunStartupStatus } from "./chat-run-startup.ts";
 import { forwardChatWheelToTranscript } from "./chat-scroll-input.ts";
 import type { ChatState } from "./chat-state-contract.ts";
+import "./components/chat-comment-controller.ts";
 import {
   type ChatPlacementStartupNoticeProps,
   renderChatComposerNotices,
   renderChatTopbarNotices,
 } from "./chat-view-notices.ts";
-import "./components/chat-comment-controller.ts";
 import { createAsyncQuestionPresentation } from "./components/chat-async-question.ts";
 import {
   createChatAttachmentDropHandlers,
@@ -90,6 +91,8 @@ export type ChatProps = Omit<
   | "runActive"
   | "runWorking"
   | "startupLabel"
+  | "retryAt"
+  | "failureActionsRunId"
   | "questionPrompts"
   | "agents"
   | "queuedMessageAction"
@@ -281,6 +284,9 @@ export function renderChat(props: ChatProps) {
         runActive: props.runActive === true,
         runWorking,
         startupLabel: chatStartupStatusLabel(props.startupStatus, placementStartup),
+        retryAt:
+          props.startupStatus?.phase === "retrying" ? props.startupStatus.retryAt : undefined,
+        failureActionsRunId: chatFailureRunId(props.runError, props.selectedSession),
         questionPrompts: props.gatewayQuestionPrompts,
         agents: props.agentsList?.agents,
         onOpenImage: openImage,
