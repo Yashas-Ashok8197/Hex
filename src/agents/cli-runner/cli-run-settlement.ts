@@ -19,7 +19,10 @@ import {
   shouldClearInterruptedCliSessionBinding,
 } from "../cli-session.js";
 import type { EmbeddedAgentRunResult } from "../embedded-agent-runner.js";
-import { resolveExplicitFinalSourceReplyDeliveryEvidence } from "../embedded-agent-runner/delivery-evidence.js";
+import {
+  hasCompletedSourceReplyDeliveryEvidence,
+  resolveExplicitFinalSourceReplyDeliveryEvidence,
+} from "../embedded-agent-runner/delivery-evidence.js";
 import { resolveAuthProfileFailureReason } from "../embedded-agent-runner/run/auth-profile-failure-policy.js";
 import { buildEmbeddedRunPayloads } from "../embedded-agent-runner/run/payloads.js";
 import { mergeAttemptToolMediaPayloads } from "../embedded-agent-runner/run/tool-media-payloads.js";
@@ -239,8 +242,9 @@ export async function settlePreparedCliRun(params: {
   } catch (error) {
     recordCleanupError(error);
   }
+  const delivered = "result" in outcome && hasCompletedSourceReplyDeliveryEvidence(outcome.result);
   if (cleanupError) {
-    if (completed || "error" in outcome || outcome.result.didSendViaMessagingTool === true) {
+    if (completed || "error" in outcome || delivered) {
       log.warn(`cli run cleanup failed after completion: ${formatErrorMessage(cleanupError)}`);
     } else {
       diagnosticLifecycle?.setPhase("cleanup");
@@ -287,7 +291,7 @@ export async function settlePreparedCliRun(params: {
       ? outcome.error
       : new Error(formatErrorMessage(outcome.error));
   }
-  if (cleanupError && !completed && outcome.result.didSendViaMessagingTool !== true) {
+  if (cleanupError && !completed && !delivered) {
     throw cleanupError;
   }
   return outcome.result;
