@@ -64,7 +64,9 @@ describe("desktop runtime source plugins", () => {
     [["v2026.10.2", "v2026.10.2-1"], "v2026.10.2"],
   ])("recognizes only matching exact release source tags (%j)", (tags, expected) => {
     const { root, commit } = fixture();
-    for (const tag of tags) git(root, "tag", tag);
+    for (const tag of tags) {
+      git(root, "tag", tag);
+    }
     expect(desktopRuntimeReleaseTag(root, "2026.10.2", commit)).toBe(expected);
   });
 

@@ -32,10 +32,15 @@ export function desktopRuntimeReleaseTag(root, version, commit) {
 function directoryBytes(directory) {
   let bytes = 0;
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    if (entry.name === "node_modules") continue;
+    if (entry.name === "node_modules") {
+      continue;
+    }
     const file = path.join(directory, entry.name);
-    if (entry.isDirectory()) bytes += directoryBytes(file);
-    else if (entry.isFile()) bytes += fs.statSync(file).size;
+    if (entry.isDirectory()) {
+      bytes += directoryBytes(file);
+    } else if (entry.isFile()) {
+      bytes += fs.statSync(file).size;
+    }
   }
   return bytes;
 }
@@ -43,25 +48,36 @@ function directoryBytes(directory) {
 function dependencyRoot(from, name) {
   for (let cursor = from; ; cursor = path.dirname(cursor)) {
     const candidate = path.join(cursor, "node_modules", name);
-    if (fs.existsSync(path.join(candidate, "package.json"))) return fs.realpathSync(candidate);
-    if (cursor === path.dirname(cursor)) return null;
+    if (fs.existsSync(path.join(candidate, "package.json"))) {
+      return fs.realpathSync(candidate);
+    }
+    if (cursor === path.dirname(cursor)) {
+      return null;
+    }
   }
 }
 
 function runtimeDependencies(root, seen = new Set()) {
   const manifest = readJson(path.join(root, "package.json"));
   for (const [name, optional] of [
-    ...Object.keys(manifest.dependencies ?? {}).map((name) => [name, false]),
-    ...Object.keys(manifest.optionalDependencies ?? {}).map((name) => [name, true]),
+    ...Object.keys(manifest.dependencies ?? {}).map((dependencyName) => [dependencyName, false]),
+    ...Object.keys(manifest.optionalDependencies ?? {}).map((dependencyName) => [
+      dependencyName,
+      true,
+    ]),
   ]) {
     const dependency = dependencyRoot(root, name);
     if (!dependency) {
-      if (optional) continue;
+      if (optional) {
+        continue;
+      }
       throw new Error(
         `Missing build dependency ${name} from ${root}; install workspace dependencies first.`,
       );
     }
-    if (seen.has(dependency)) continue;
+    if (seen.has(dependency)) {
+      continue;
+    }
     seen.add(dependency);
     runtimeDependencies(dependency, seen);
   }
@@ -73,12 +89,15 @@ export function planDesktopRuntimePlugins(root) {
   const manifest = readJson(path.join(root, "package.json"));
   const commit = git(root, ["rev-parse", "HEAD"]);
   const releaseTag = desktopRuntimeReleaseTag(root, manifest.version, commit);
-  if (releaseTag) return { commit, releaseTag, pluginIds: [] };
+  if (releaseTag) {
+    return { commit, releaseTag, pluginIds: [] };
+  }
   const build = readJson(path.join(root, "dist", "build-info.json"));
-  if (build.commit !== commit)
+  if (build.commit !== commit) {
     throw new Error(
       "Build the desktop runtime from the current source commit before staging plugins.",
     );
+  }
   const catalog = readJson(path.join(root, "scripts/lib/official-external-plugin-catalog.json"));
   const officialNames = new Set(catalog.entries.map((entry) => entry.name));
   const excluded = collectRootPackageExcludedExtensionDirs({ cwd: root });
@@ -89,30 +108,38 @@ export function planDesktopRuntimePlugins(root) {
     .filter(({ directory }) =>
       officialNames.has(readJson(path.join(directory, "package.json")).name),
     )
-    .sort((left, right) => left.id.localeCompare(right.id));
+    .toSorted((left, right) => left.id.localeCompare(right.id));
   const coreDependencies = runtimeDependencies(root);
   const addedDependencies = new Set();
   let allPluginBytes = 0;
   for (const plugin of plugins) {
     allPluginBytes += directoryBytes(path.join(root, "dist/extensions", plugin.id));
     for (const dependency of runtimeDependencies(plugin.directory)) {
-      if (!coreDependencies.has(dependency)) addedDependencies.add(dependency);
+      if (!coreDependencies.has(dependency)) {
+        addedDependencies.add(dependency);
+      }
     }
   }
-  for (const dependency of addedDependencies) allPluginBytes += directoryBytes(dependency);
+  for (const dependency of addedDependencies) {
+    allPluginBytes += directoryBytes(dependency);
+  }
   const pluginIds = allPluginBytes > MAX_PLUGIN_BYTES ? ["codex"] : plugins.map(({ id }) => id);
-  if (!plugins.some(({ id }) => id === "codex"))
+  if (!plugins.some(({ id }) => id === "codex")) {
     throw new Error("The official Codex source plugin is missing.");
+  }
   return { commit, releaseTag: null, pluginIds, allPluginBytes };
 }
 
 /** Stamp installed artifacts only, preserving release source and build-info bytes. */
 export function stampDesktopRuntimePlugins(packageRoot, plan) {
-  if (plan.pluginIds.length === 0) return;
+  if (plan.pluginIds.length === 0) {
+    return;
+  }
   const file = path.join(packageRoot, "dist/build-info.json");
   const build = readJson(file);
-  if (build.commit !== plan.commit)
+  if (build.commit !== plan.commit) {
     throw new Error("Staged official plugins and runtime have different source commits.");
+  }
   for (const id of plan.pluginIds) {
     const plugin = readJson(path.join(packageRoot, "dist/extensions", id, "package.json"));
     for (const entry of plugin.openclaw.extensions) {
@@ -127,10 +154,13 @@ export function stampDesktopRuntimePlugins(packageRoot, plan) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const [operation, root, planFile] = process.argv.slice(2);
-  if (operation === "plan") console.log(JSON.stringify(planDesktopRuntimePlugins(root)));
-  else if (operation === "stamp") stampDesktopRuntimePlugins(root, readJson(planFile));
-  else
+  if (operation === "plan") {
+    console.log(JSON.stringify(planDesktopRuntimePlugins(root)));
+  } else if (operation === "stamp") {
+    stampDesktopRuntimePlugins(root, readJson(planFile));
+  } else {
     throw new Error(
       "Usage: desktop-runtime-plugins.mjs plan <source> | stamp <installed-package> <plan.json>",
     );
+  }
 }
