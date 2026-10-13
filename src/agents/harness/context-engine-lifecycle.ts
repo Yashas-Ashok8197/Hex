@@ -286,9 +286,15 @@ export async function prepareHarnessContextEnginePrompt(
     contextEnginePromptAuthority: "assembled",
   };
   if (!params.contextEngine) {
-    return initial;
+    return {
+      ...initial,
+      messages: params.repairToolUseResultPairing
+        ? sanitizeToolUseResultPairingForModel(initial.messages, params.isOpenAIResponsesApi)
+        : initial.messages,
+    };
   }
   return runWithHarnessSourceFence(params, async () => {
+    let prepared: PreparedHarnessContextEnginePrompt;
     try {
       const preassemblyMessages = params.messages.slice();
       const assembled = await assembleHarnessContextEngineWithinSourceScope(params);
@@ -296,10 +302,8 @@ export async function prepareHarnessContextEnginePrompt(
         throw new Error("context engine assemble returned no result");
       }
       const authority = assembled.promptAuthority ?? "assembled";
-      return {
-        messages: params.repairToolUseResultPairing
-          ? sanitizeToolUseResultPairingForModel(assembled.messages, params.isOpenAIResponsesApi)
-          : assembled.messages,
+      prepared = {
+        messages: assembled.messages,
         systemPrompt: assembled.systemPromptAddition
           ? prependSystemPromptAdditionAfterCacheBoundary({
               systemPrompt: initial.systemPrompt,
@@ -313,7 +317,7 @@ export async function prepareHarnessContextEnginePrompt(
       };
     } catch (error) {
       params.warn(`context engine assemble failed, using pipeline messages: ${String(error)}`);
-      return {
+      prepared = {
         ...initial,
         messages: boundContextEngineAssembly(
           { messages: initial.messages, estimatedTokens: 0 },
@@ -322,6 +326,14 @@ export async function prepareHarnessContextEnginePrompt(
         ).messages,
       };
     }
+    // Windowing and engine hooks can both orphan results. Repair the final model
+    // view once, including bounded fallback, while source authority is retained.
+    return {
+      ...prepared,
+      messages: params.repairToolUseResultPairing
+        ? sanitizeToolUseResultPairingForModel(prepared.messages, params.isOpenAIResponsesApi)
+        : prepared.messages,
+    };
   });
 }
 

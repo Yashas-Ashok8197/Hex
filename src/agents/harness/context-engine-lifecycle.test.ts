@@ -63,6 +63,57 @@ function uniqueConfiguredProofEngineId() {
 }
 
 describe("harness context engine lifecycle", () => {
+  it.each(["absent", "assembled", "fallback"] as const)(
+    "repairs the final tool conversation when the engine is %s",
+    async (mode) => {
+      const messages: AgentMessage[] = [
+        textMessage("user", "Run the tool", 1),
+        {
+          role: "assistant",
+          content: [{ type: "toolCall", id: "call_fixture", name: "exec", arguments: {} }],
+          timestamp: 2,
+        } as AgentMessage,
+      ];
+      const before = JSON.stringify(messages);
+      const warn = vi.fn();
+      const result = await prepareHarnessContextEnginePrompt({
+        ...sessionParams,
+        messages,
+        ...(mode === "absent"
+          ? {}
+          : {
+              contextEngine: createContextEngine({
+                assemble: async () => {
+                  if (mode === "fallback") {
+                    throw new Error("synthetic assembly failure");
+                  }
+                  return { messages, estimatedTokens: 0 };
+                },
+              }),
+            }),
+        promptBudget: {
+          contextTokens: 100_000,
+          reserveTokens: 0,
+          systemPrompt: "system",
+          prompt: "next",
+        },
+        repairToolUseResultPairing: true,
+        isOpenAIResponsesApi: true,
+        warn,
+      });
+      expect(result.messages).toHaveLength(3);
+      expect(result.messages[2]).toMatchObject({
+        role: "toolResult",
+        toolCallId: "call_fixture",
+        toolName: "exec",
+        isError: true,
+        content: [{ type: "text", text: "aborted" }],
+      });
+      expect(JSON.stringify(messages)).toBe(before);
+      expect(warn).toHaveBeenCalledTimes(mode === "fallback" ? 1 : 0);
+    },
+  );
+
   it.each([false, true])(
     "bounds oversized assembly without changing stored messages (engine throws=%s)",
     async (throws) => {

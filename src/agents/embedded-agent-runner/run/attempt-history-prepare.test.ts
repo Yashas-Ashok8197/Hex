@@ -82,7 +82,11 @@ function createFixture() {
       },
       toolCatalog: { toolSearchRunPlan: {} },
     },
-    setup: { sessionAgentId: "main", effectiveWorkspace: "/tmp/s11-hierarchy" },
+    setup: {
+      sessionAgentId: "main",
+      effectiveWorkspace: "/tmp/s11-hierarchy",
+      prepStages: { mark: vi.fn() },
+    },
   } as Parameters<typeof prepareEmbeddedAttemptHistory>[0];
   const controller = new AbortController();
   const assertActive = () => controller.signal.throwIfAborted();
