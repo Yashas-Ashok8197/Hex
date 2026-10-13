@@ -446,6 +446,8 @@ describe("Systems workspace", () => {
   );
 
   it("sorts and filters the machine inventory without replacing the selected machine", async () => {
+    // Open menus need frame boundaries instead of the sidebar fixture's recursive microtasks.
+    vi.useFakeTimers({ toFake: ["requestAnimationFrame", "cancelAnimationFrame"] });
     const environments: EnvironmentSummary[] = [
       host,
       { ...offline, id: "node:delta", label: "Delta laptop" },
@@ -481,9 +483,11 @@ describe("Systems workspace", () => {
       expect(trigger).toBeTruthy();
       trigger!.click();
       await waitForSolid(() => expect(trigger!.getAttribute("aria-expanded")).toBe("true"));
+      vi.advanceTimersToNextFrame();
       const item = menu?.querySelector<HTMLButtonElement>(`.oc-menu-item[data-value="${value}"]`);
       expect(item).toBeTruthy();
       item!.click();
+      vi.advanceTimersToNextFrame();
       await sidebar.updateComplete;
       await page.updateComplete;
     };

@@ -433,6 +433,12 @@ openclaw-systems-page {
   flex: 0 0 auto;
 }
 
+.systems-filter-menu .oc-menu {
+  --oc-overlay-distance: 0px;
+
+  width: min(220px, calc(100dvw - 16px));
+}
+
 .systems-filter-menu .oc-menu-item__check {
   display: none;
 }
