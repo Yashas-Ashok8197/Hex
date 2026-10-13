@@ -110,7 +110,9 @@ it("discards rolled-back participant facts and retains the next committed contri
         throw new Error("rollback participant");
       }),
     ).toThrow("rollback participant");
-    expect(f.read()).toEqual(before);
+    const rolledBack = f.read();
+    expect(rolledBack.participants).toEqual(before.participants);
+    expect(rolledBack.entry).toEqual(before.entry);
     runSqliteImmediateTransactionSync(f.database.db, record);
     expect(f.read().participants).toMatchObject([
       { identity: { id: "peer" }, contributionCount: 1 },

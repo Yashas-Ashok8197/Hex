@@ -187,11 +187,9 @@ export function createSessionActorWorker(
         }));
         entry.participantCount = working.hot.participants.length;
       }
-      replaceSessionActorStoredEntry(working, sessionKey, {
-        entry,
-        row: selected.row,
-        window: working.window,
-      });
+      working.entryRows = writableSessionActorMap(working.entryRows);
+      working.entryRows.set(sessionKey, { ...selected, entry: structuredClone(entry) });
+      working.hot.entry = entry;
     }
   };
   const prepareParticipantUpdate = (
