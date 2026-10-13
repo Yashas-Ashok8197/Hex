@@ -3,10 +3,8 @@
 import { createComponent } from "solid-js";
 import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { createDeferred } from "../../../test/helpers/promise.ts";
-import {
-  CommandPaletteLoadingState,
-  CommandPaletteLoading,
-} from "../app/app-shell-command-palette-loading.ts";
+import { CommandPaletteLoading } from "../app/app-shell-command-palette-loading-view.tsx";
+import { CommandPaletteLoadingState } from "../app/app-shell-command-palette-loading.ts";
 import { createWebPushCapability } from "../app/web-push.ts";
 import * as toast from "../lib/toast.ts";
 import * as payloads from "../pages/chat/attachment-payload-store.ts";

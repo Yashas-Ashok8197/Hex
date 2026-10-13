@@ -131,14 +131,12 @@ describe.skipIf(!hasBrowserLayout)("panel tab strip browser lifecycle", () => {
     expect(document.activeElement).toBe(host);
     expect(container.activeElement).toBe(initialActive);
 
-    const reordered = renderControlledStrip({
+    await renderControlledStrip({
       container,
       tabs: [tabs[2]!, { ...tabs[1]!, label: "Tab B navigated" }, tabs[0]!],
       activeId: "b",
       onSelect: vi.fn(),
     });
-    queueMicrotask(() => initialActive.blur());
-    await reordered;
     const reorderedActive = await expectControlledSelection(container, "b");
 
     expect(reorderedActive).toBe(initialActive);

@@ -3,10 +3,8 @@ import { createEffect, createMemo, Show } from "solid-js";
 import type { RouteId } from "../app-routes.ts";
 import { renderLazyElementModal } from "../components/lazy-view-error.ts";
 import type { DebugOverlayFrameHost } from "../pages/debug/debug-overlay-frame.ts";
-import {
-  CommandPaletteLoading,
-  type CommandPaletteLoadingState,
-} from "./app-shell-command-palette-loading.ts";
+import { CommandPaletteLoading } from "./app-shell-command-palette-loading-view.tsx";
+import type { CommandPaletteLoadingState } from "./app-shell-command-palette-loading.ts";
 import type { ShellNewSessionHost } from "./app-shell-new-session.ts";
 import type { ApplicationNavigationOptions } from "./context.ts";
 import {

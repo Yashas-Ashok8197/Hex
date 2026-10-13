@@ -6,10 +6,8 @@ import { installDialogPolyfill } from "../test-helpers/modal-dialog.ts";
 import { cleanupSolid, mountSolid } from "../test-helpers/mount-solid.ts";
 import { flush } from "../test-helpers/solid-settle.ts";
 import "../components/modal-dialog.ts";
-import {
-  CommandPaletteLoadingState,
-  CommandPaletteLoading,
-} from "./app-shell-command-palette-loading.ts";
+import { CommandPaletteLoading } from "./app-shell-command-palette-loading-view.tsx";
+import { CommandPaletteLoadingState } from "./app-shell-command-palette-loading.ts";
 
 let restoreDialog: () => void;
 let container: HTMLDivElement;

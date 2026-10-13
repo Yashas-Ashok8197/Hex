@@ -24,8 +24,6 @@ import {
 } from "./lazy-custom-element.ts";
 import { lazyShellEvent, type LazyShellEvent } from "./lazy-shell-action.ts";
 
-export { CommandPaletteLoading } from "./app-shell-command-palette-loading-view.tsx";
-
 type CommandPaletteShellHost = {
   readonly context?: Pick<ApplicationContext, "gateway"> &
     Partial<Pick<ApplicationContext, "config">>;
