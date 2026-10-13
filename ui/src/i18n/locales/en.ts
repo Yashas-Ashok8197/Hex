@@ -1548,7 +1548,7 @@ export const en: TranslationMap & {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Hex",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1557,7 +1557,7 @@ export const en: TranslationMap & {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Hex cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",

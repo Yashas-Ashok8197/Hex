@@ -131,10 +131,10 @@ describe("OpenClaw shell document title", () => {
 
     shell.syncDocumentTitle();
 
-    expect(document.title).toBe("Chat — OpenClaw");
+    expect(document.title).toBe("Chat — Hex");
   });
 
-  it.each(["OpenClaw", "Northstar"])(
+  it.each(["Hex", "Northstar"])(
     "uses %s and the environment in route and custodian titles",
     (brandName) => {
       const shell = createShell(
@@ -163,7 +163,7 @@ describe("OpenClaw shell document title", () => {
 
     shell.syncDocumentTitle();
 
-    expect(document.title).toBe("Quarterly launch plan — OpenClaw");
+    expect(document.title).toBe("Quarterly launch plan — Hex");
   });
 
   it("updates the active title without rendering the shell for session publications", async () => {
@@ -182,7 +182,7 @@ describe("OpenClaw shell document title", () => {
       await settleShell(shell);
     }
 
-    expect(document.title).toBe("Revised launch plan — OpenClaw");
+    expect(document.title).toBe("Revised launch plan — Hex");
     expect(renderShell).not.toHaveBeenCalled();
   });
 
@@ -214,7 +214,7 @@ describe("OpenClaw shell document title", () => {
     replacement.sessions.patchRowLocal(background.key, { derivedTitle: "Replacement title" });
     await vi.advanceTimersByTimeAsync(20);
     await settleShell(shell);
-    expect(document.title).toBe("Replacement title — OpenClaw");
+    expect(document.title).toBe("Replacement title — Hex");
 
     shell.disconnect();
     shell.element.remove();
@@ -237,7 +237,7 @@ describe("OpenClaw shell document title", () => {
 
     shell.syncDocumentTitle();
 
-    expect(document.title).toBe("Molty — OpenClaw");
+    expect(document.title).toBe("Molty — Hex");
   });
 
   it("falls back to the session display name when the main agent is missing", () => {
@@ -255,7 +255,7 @@ describe("OpenClaw shell document title", () => {
 
     shell.syncDocumentTitle();
 
-    expect(document.title).toBe("Fallback thread — OpenClaw");
+    expect(document.title).toBe("Fallback thread — Hex");
   });
 
   it("prefixes the pending approval count", () => {
@@ -264,7 +264,7 @@ describe("OpenClaw shell document title", () => {
 
     shell.syncDocumentTitle();
 
-    expect(document.title).toBe("(2) Usage — OpenClaw");
+    expect(document.title).toBe("(2) Usage — Hex");
   });
 
   it("shows disconnected instead of a stale approval count", () => {
@@ -273,6 +273,6 @@ describe("OpenClaw shell document title", () => {
 
     shell.syncDocumentTitle();
 
-    expect(document.title).toBe("(Disconnected) Usage — OpenClaw");
+    expect(document.title).toBe("(Disconnected) Usage — Hex");
   });
 });

@@ -175,7 +175,7 @@ describe("portable theme definition", () => {
 it("resolves omitted branding to the claw without critters or a hat and retains authored branding", () => {
   const defaults = {
     mascot: "claw",
-    brandName: "OpenClaw",
+    brandName: "Hex",
     brandIcon: "claw",
     workingIndicator: "claw",
     lobsterdex: true,

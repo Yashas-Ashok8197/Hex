@@ -66,7 +66,7 @@ describe("renderAbout", () => {
     render(createProps({ onPokeClawd }), container);
 
     const hero = container.querySelector(".about-hero");
-    expect(hero?.querySelector(".about-hero__name")?.textContent).toBe("OpenClaw");
+    expect(hero?.querySelector(".about-hero__name")?.textContent).toBe("Hex");
     expect(hero?.querySelector(".about-hero__version")?.textContent).toBe("v2026.7.10");
     expect(hero?.querySelector(".about-hero__clawd svg")).not.toBeNull();
 

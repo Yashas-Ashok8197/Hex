@@ -366,14 +366,14 @@ export function titleForRoute(routeId: NavigationRouteId, translate = t): string
 /** Window/tab title, markers leftmost because tabs truncate from the right.
  * A disconnected Gateway replaces the approval count (a stale queue is not
  * actionable); titles already ending in the brand
- * ("Ask OpenClaw") skip the suffix so it never reads "… OpenClaw — OpenClaw". */
+ * ("Ask Hex") skip the suffix so it never reads "… Hex — Hex". */
 export function formatDocumentTitle(options: {
   context: string;
   attentionCount?: number;
   brandName?: string;
   gatewayDisconnected?: boolean;
 }): string {
-  const brandName = options.brandName ?? "OpenClaw";
+  const brandName = options.brandName ?? "Hex";
   const base = options.context.endsWith(brandName)
     ? options.context
     : `${options.context} — ${brandName}`;

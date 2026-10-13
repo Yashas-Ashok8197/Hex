@@ -81,11 +81,11 @@ describe("formatDocumentTitle", () => {
 
   it("shows attention separately from the disconnected state", () => {
     expect(formatDocumentTitle({ context: "Usage", attentionCount: 3 })).toBe(
-      "(3) Usage — OpenClaw",
+      "(3) Usage — Hex",
     );
     expect(
       formatDocumentTitle({ context: "Usage", attentionCount: 3, gatewayDisconnected: true }),
-    ).toBe("(Disconnected) Usage — OpenClaw");
+    ).toBe("(Disconnected) Usage — Hex");
   });
 });
 
