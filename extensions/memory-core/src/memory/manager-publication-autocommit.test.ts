@@ -54,7 +54,7 @@ it("publishes settled write tokens and fresh facts for scalar autocommits", () =
   }
 });
 
-it("retains the cache count across writes and rollback, and reloads after an unscoped clear", () => {
+it("retains the cache count across writes and reloads after rollback or an unscoped clear", () => {
   const filename = path.join(tempDirs.make("memory-publication-cache-"), "index.sqlite");
   const db = openNodeSqliteDatabase(filename);
   const backend = bindSqliteWorkerBackend(
@@ -90,12 +90,14 @@ it("retains the cache count across writes and rollback, and reloads after an uns
     expect(prune(2)).toMatchObject({ ok: true, value: false });
     expect(write(["a"])).toMatchObject({ ok: true });
     expect(hashes()).toEqual([{ hash: "a" }, { hash: "b" }]);
+    expect(counts()).toBe(coldCounts);
 
     // One insert succeeds before the second aborts: neither the rows nor count may leak.
     expect(write(["c", "fail"], 4)).toMatchObject({ ok: false, committed: false });
     expect(prune(2)).toMatchObject({ ok: true, value: false });
     expect(hashes()).toEqual([{ hash: "a" }, { hash: "b" }]);
-    expect(counts()).toBe(coldCounts);
+    // Failed writes invalidate receipts even when SQLite rolls back all rows.
+    const settledCounts = counts();
 
     expect(
       backend.execute({
@@ -105,13 +107,13 @@ it("retains the cache count across writes and rollback, and reloads after an uns
     ).toMatchObject({ ok: true });
     expect(prune(0)).toMatchObject({ ok: true, value: false });
     expect(hashes()).toEqual([]);
-    expect(counts()).toBe(coldCounts);
+    expect(counts()).toBe(settledCounts);
 
     expect(write(["a", "b"])).toMatchObject({ ok: true });
     // Forget/repair writers are deliberately unscoped and invalidate the retained count.
     db.exec("DELETE FROM memory_embedding_cache");
     expect(prune(0)).toMatchObject({ ok: true, value: false });
-    expect(counts()).toBeGreaterThan(coldCounts);
+    expect(counts()).toBeGreaterThan(settledCounts);
     expect(write(["c"])).toMatchObject({ ok: true });
     expect(prune(0)).toMatchObject({ ok: true, value: true });
     expect(prune(0)).toMatchObject({ ok: true, value: false });
